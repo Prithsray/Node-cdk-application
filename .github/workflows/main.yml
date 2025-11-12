@@ -31,7 +31,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::320765978526:role/GitHubCdkDeployRole
-          aws-region: ap-south-1
+          aws-region: us-east-1
 
       - name: Deploy all stacks
         working-directory: ./infra
