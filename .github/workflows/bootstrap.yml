@@ -1,0 +1,34 @@
+name: Bootstrap AWS via temporary credentials
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install CDK
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS (temporary user)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Deploy IAM Stack
+        working-directory: ./infra
+        run: |
+          npm ci
+          npm run build
+          cdk bootstrap
+          cdk deploy IamStack --require-approval never
