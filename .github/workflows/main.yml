@@ -37,7 +37,7 @@ jobs:
 
       - name: Bootstrap CDK environment (first run)
         working-directory: ./infra
-        run: cdk bootstrap aws://320765978526/ap-south-1
+        run: cdk bootstrap aws://320765978526/us-east-1
 
       - name: Deploy all stacks
         working-directory: ./infra
