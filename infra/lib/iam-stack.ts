@@ -8,6 +8,7 @@ export class IamStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // ✅ Lambda Execution Role
     this.lambdaRole = new iam.Role(this, 'LambdaExecutionRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
@@ -16,7 +17,27 @@ export class IamStack extends cdk.Stack {
       description: 'Free-tier minimal Lambda execution role',
     });
 
-    // ✅ ensure deletion with stack
     this.lambdaRole.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+
+    // ✅ Role for GitHub Actions CDK Deploy
+    const githubDeployRole = new iam.Role(this, 'GitHubCdkDeployRole', {
+      roleName: 'GitHubCdkDeployRole',
+      description: 'Allows GitHub Actions to deploy CDK stacks using OIDC',
+      assumedBy: new iam.WebIdentityPrincipal(
+        'token.actions.githubusercontent.com',
+        {
+          StringEquals: {
+            'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+            // Change 'your-username/your-repo' below
+            'token.actions.githubusercontent.com:sub': 'repo:Prithsray/Node-cdk-application:ref:refs/heads/main',
+          },
+        }
+      ),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'),
+      ],
+    });
+
+    githubDeployRole.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
   }
 }
