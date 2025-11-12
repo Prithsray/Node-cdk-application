@@ -34,7 +34,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::320765978526:role/GitHubCdkDeployRole
-          aws-region: ap-south-1
+          aws-region: us-east-1
 
       # 👇 This destroys all deployed stacks in the account/region
       - name: Destroy all CDK stacks
