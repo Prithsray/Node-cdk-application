@@ -1,9 +1,8 @@
-name: CDK Deploy (OIDC Secure)
+name: Deploy CDK via OIDC
 
+# 👇 Allow manual trigger from the Actions tab
 on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch:    # <-- adds a button in GitHub Actions UI
 
 permissions:
   id-token: write
@@ -14,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -22,10 +21,9 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install CDK and dependencies
+      - name: Install dependencies
         working-directory: ./infra
         run: |
-          npm install -g aws-cdk
           npm ci
           npm run build
 
@@ -33,12 +31,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::320765978526:role/GitHubCdkDeployRole
-          aws-region: us-east-1
+          aws-region: ap-south-1
 
-      - name: Bootstrap environment (if first deploy)
-        working-directory: ./infra
-        run: cdk bootstrap
-
-      - name: Deploy CDK stacks
+      - name: Deploy all stacks
         working-directory: ./infra
         run: cdk deploy --all --require-approval never
