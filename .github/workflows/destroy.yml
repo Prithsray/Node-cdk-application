@@ -1,0 +1,42 @@
+name: Destroy CDK Stacks via OIDC
+
+# 👇 Adds a "Run workflow" button in GitHub Actions UI
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
+
+      - name: Install dependencies
+        working-directory: ./infra
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::320765978526:role/GitHubCdkDeployRole
+          aws-region: ap-south-1
+
+      # 👇 This destroys all deployed stacks in the account/region
+      - name: Destroy all CDK stacks
+        working-directory: ./infra
+        run: cdk destroy --all --force
