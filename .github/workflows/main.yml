@@ -1,7 +1,7 @@
 name: Deploy CDK via OIDC
 
 on:
-  workflow_dispatch:  # ✅ manual trigger button in GitHub Actions
+  workflow_dispatch:  # manual trigger button
 
 permissions:
   id-token: write
@@ -20,25 +20,25 @@ jobs:
         with:
           node-version: 18
 
-      # ✅ Install AWS CDK CLI globally
-      - name: Install AWS CDK
+      - name: Install AWS CDK CLI
         run: npm install -g aws-cdk
 
-      # ✅ Install project dependencies and build
       - name: Install dependencies
         working-directory: ./infra
         run: |
           npm ci
           npm run build
 
-      # ✅ Configure AWS via OIDC
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::320765978526:role/GitHubCdkDeployRole
-          aws-region: ap-south-1
+          aws-region: us-east-1
 
-      # ✅ Deploy CDK stacks
+      - name: Bootstrap CDK environment (first run)
+        working-directory: ./infra
+        run: cdk bootstrap aws://320765978526/ap-south-1
+
       - name: Deploy all stacks
         working-directory: ./infra
         run: cdk deploy --all --require-approval never
